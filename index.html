@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System CRM - Sprzedaż dodatkowa</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu li:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu li.active {
+            background: var(--primary);
+            border-left: 3px solid var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #3d8b40;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        th {
+            background-color: var(--light);
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(79, 195, 247, 0.05);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-new {
+            background: #bbdefb;
+            color: #1565c0;
+        }
+
+        .status-in-progress {
+            background: #fff8e1;
+            color: #ff8f00;
+        }
+
+        .status-completed {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .status-cancelled {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--light-gray);
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .file-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+
+        .file-actions {
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .product-card {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            width: 200px;
+            height: 200px;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .product-sku {
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            margin-bottom: 15px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: var(--light);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .product-card {
+                flex-direction: column;
+            }
+            
+            .product-image {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>System CRM</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li>Dashboard</li>
+            <li class="active" data-view="sales-list">Sprzedaż dodatkowa</li>
+            <li>Klienci</li>
+            <li>Projekty</li>
+            <li>Raporty</li>
+            <li>Ustawienia</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <!-- Widok listy sprzedaży -->
+        <div id="sales-list-view">
+            <div class="header">
+                <h1>Sprzedaż dodatkowa</h1>
+                <button class="btn" id="add-sale-btn">Dodaj nową sprzedaż</button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table id="sales-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nazwa</th>
+                                <th>Klient</th>
+                                <th>Opiekun (Region)</th>
+                                <th>Numer IO</th>
+                                <th>Data</th>
+                                <th>Wartość</th>
+                                <th>Status</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dane będą wstawiane dynamicznie -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widok formularza sprzedaży -->
+        <div id="sale-form-view" class="hidden">
+            <div class="header">
+                <h1 id="form-title">Nowa sprzedaż dodatkowa</h1>
+                <div>
+                    <button class="btn btn-secondary" id="back-to-list">Powrót do listy</button>
+                    <button class="btn btn-success" id="save-sale">Zapisz sprzedaż</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-name">Nazwa sprzedaży*</label>
+                        <input type="text" id="sale-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-category">Kategoria*</label>
+                        <select id="sale-category" required>
+                            <option value="">Wybierz kategorię</option>
+                            <option value="hardware">Szkolenie</option>
+                            <option value="license">Wdrożenie</option>
+                            <option value="service">Usługa</option>
+                            <option value="consultation">E-learning</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-client">Klient*</label>
+                        <select id="sale-client" required>
+                            <option value="">Wybierz klienta</option>
+                            <option value="1">ABC Sp. z o.o.</option>
+                            <option value="2">XYZ S.A.</option>
+                            <option value="3">Testowa Firma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-contact">Kontakt</label>
+                        <select id="sale-contact">
+                            <option value="">Wybierz kontakt</option>
+                            <option value="1">Jan Kowalski (ABC)</option>
+                            <option value="2">Anna Nowak (XYZ)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-owner">Opiekun sprzedaży (Region)*</label>
+                        <select id="sale-owner" required>
+                            <option value="">Wybierz opiekuna</option>
+                            <option value="1">Jan Nowak (Region Północny)</option>
+                            <option value="2">Anna Kowalska (Region Południowy)</option>
+                            <option value="3">Piotr Wiśniewski (Region Wschodni)</option>
+                            <option value="4">Maria Dąbrowska (Region Zachodni)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-io-number">Numer IO*</label>
+                        <input type="text" id="sale-io-number" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-date">Data sprzedaży*</label>
+                        <input type="date" id="sale-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-status">Status*</label>
+                        <select id="sale-status" required>
+                            <option value="new">Nowa</option>
+                            <option value="in-progress">W realizacji</option>
+                            <option value="completed">Zakończona</option>
+                            <option value="cancelled">Anulowana</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sale-description">Opis</label>
+                    <textarea id="sale-description" rows="3"></textarea>
+                </div>
+
+                <h3>Dane finansowe</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-amount">Kwota netto*</label>
+                        <input type="number" id="sale-amount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-vat">VAT (%)*</label>
+                        <select id="sale-vat" required>
+                            <option value="23">23%</option>
+                            <option value="8">8%</option>
+                            <option value="5">5%</option>
+                            <option value="0">0%</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-gross">Kwota brutto</label>
+                        <input type="number" id="sale-gross" readonly>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sale-vat-exempt">
+                    <label for="sale-vat-exempt">Zwolniony z VAT</label>
+                </div>
+
+                <h3>Dane do faktury</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-invoice">Numer faktury</label>
+                        <input type="text" id="sale-invoice">
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-payment">Status płatności</label>
+                        <select id="sale-payment">
+                            <option value="not-paid">Nieopłacona</option>
+                            <option value="partially-paid">Częściowo opłacona</option>
+                            <option value="paid">Opłacona</option>
+                            <option value="overdue">Przeterminowana</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-sap-number">Numer klienta SAP*</label>
+                        <input type="text" id="sale-sap-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-client-io-number">Numer IO klienta</label>
+                        <input type="text" id="sale-client-io-number">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sale-payment-method">Forma płatności</label>
+                        <select id="sale-payment-method">
+                            <option value="transfer">Przelew</option>
+                            <option value="cash">STRIPE</option>
+                            <option value="card">Pro-forma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-payment-date">Termin płatności</label>
+                        <input type="date" id="sale-payment-date">
+                    </div>
+                </div>
+
+                <h3>Załączniki</h3>
+                <div class="file-upload">
+                    <p>Przeciągnij i upuść pliki tutaj lub kliknij, aby wybrać</p>
+                    <input type="file" id="file-input" multiple style="display: none;">
+                    <button class="btn btn-sm" id="upload-btn">Wybierz pliki</button>
+                </div>
+                <ul class="file-list" id="file-list">
+                    <!-- Lista plików będzie dodawana dynamicznie -->
+                </ul>
+
+                <div class="form-group">
+                    <label for="sale-notes">Notatki</label>
+                    <textarea id="sale-notes" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dane przykładowe
+            const salesData = [
+                {
+                    id: 1,
+                    name: "Dodatkowa licencja HiVo",
+                    client: "ABC Sp. z o.o.",
+                    owner: "Jan Nowak (Region Północny)",
+                    ioNumber: "IO-2023-001",
+                    date: "2023-05-15",
+                    amount: 1200.00,
+                    vat: 23,
+                    vatExempt: false,
+                    status: "completed",
+                    category: "license",
+                    invoiceNumber: "FV/2023/05/001",
+                    paymentStatus: "paid",
+                    sapNumber: "SAP-001",
+                    clientIONumber: "CL-IO-001",
+                    paymentMethod: "transfer",
+                    paymentDate: "2023-05-30"
+                },
+                {
+                    id: 2,
+                    name: "Serwis roczny - rozszerzenie",
+                    client: "XYZ S.A.",
+                    owner: "Anna Kowalska (Region Południowy)",
+                    ioNumber: "IO-2023-002",
+                    date: "2023-06-02",
+                    amount: 3500.00,
+                    vat: 23,
+                    vatExempt: false,
+                    status: "in-progress",
+                    category: "service",
+                    invoiceNumber: "FV/2023/06/001",
+                    paymentStatus: "partially-paid",
+                    sapNumber: "SAP-002",
+                    clientIONumber: "CL-IO-002",
+                    paymentMethod: "transfer",
+                    paymentDate: "2023-06-30"
+                },
+                {
+                    id: 3,
+                    name: "Dodatkowy laptop Dell",
+                    client: "Testowa Firma",
+                    owner: "Piotr Wiśniewski (Region Wschodni)",
+                    ioNumber: "IO-2023-003",
+                    date: "2023-06-10",
+                    amount: 4500.00,
+                    vat: 23,
+                    vatExempt: true,
+                    status: "new",
+                    category: "hardware",
+                    invoiceNumber: "",
+                    paymentStatus: "not-paid",
+                    sapNumber: "SAP-003",
+                    clientIONumber: "CL-IO-003",
+                    paymentMethod: "transfer",
+                    paymentDate: "2023-07-10"
+                }
+            ];
+
+            // Elementy DOM
+            const salesListView = document.getElementById('sales-list-view');
+            const saleFormView = document.getElementById('sale-form-view');
+            const salesTable = document.getElementById('sales-table').getElementsByTagName('tbody')[0];
+            const addSaleBtn = document.getElementById('add-sale-btn');
+            const backToListBtn = document.getElementById('back-to-list');
+            const saveSaleBtn = document.getElementById('save-sale');
+            const formTitle = document.getElementById('form-title');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileInput = document.getElementById('file-input');
+            const fileList = document.getElementById('file-list');
+            const saleVat = document.getElementById('sale-vat');
+            const saleAmount = document.getElementById('sale-amount');
+            const saleGross = document.getElementById('sale-gross');
+            const saleVatExempt = document.getElementById('sale-vat-exempt');
+
+            // Zmienne stanu
+            let currentSaleId = null;
+            let files = [];
+
+            // Inicjalizacja
+            renderSalesList();
+
+            // Obsługa zdarzeń
+            document.querySelector('.sidebar-menu li[data-view="sales-list"]').addEventListener('click', function() {
+                showSalesList();
+            });
+
+            addSaleBtn.addEventListener('click', function() {
+                showSaleForm();
+            });
+
+            backToListBtn.addEventListener('click', function() {
+                showSalesList();
+            });
+
+            saveSaleBtn.addEventListener('click', function() {
+                saveSale();
+            });
+
+            uploadBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(e.target.files);
+            });
+
+            saleVat.addEventListener('change', calculateGross);
+            saleAmount.addEventListener('input', calculateGross);
+            saleVatExempt.addEventListener('change', function() {
+                if (this.checked) {
+                    saleVat.value = "0";
+                    saleVat.disabled = true;
+                } else {
+                    saleVat.disabled = false;
+                    saleVat.value = "23";
+                }
+                calculateGross();
+            });
+
+            // Funkcje
+            function showSalesList() {
+                salesListView.classList.remove('hidden');
+                saleFormView.classList.add('hidden');
+                document.querySelector('.sidebar-menu li[data-view="sales-list"]').classList.add('active');
+                renderSalesList();
+            }
+
+            function showSaleForm(saleId = null) {
+                salesListView.classList.add('hidden');
+                saleFormView.classList.remove('hidden');
+                document.querySelector('.sidebar-menu li[data-view="sales-list"]').classList.remove('active');
+                
+                if (saleId) {
+                    // Tryb edycji
+                    currentSaleId = saleId;
+                    formTitle.textContent = 'Edytuj sprzedaż';
+                    loadSaleData(saleId);
+                } else {
+                    // Tryb dodawania
+                    currentSaleId = null;
+                    formTitle.textContent = 'Nowa sprzedaż dodatkowa';
+                    resetForm();
+                }
+            }
+
+            function renderSalesList() {
+                salesTable.innerHTML = '';
+                
+                salesData.forEach(sale => {
+                    const row = salesTable.insertRow();
+                    
+                    // Status badge
+                    let statusClass, statusText;
+                    switch(sale.status) {
+                        case 'new':
+                            statusClass = 'status-new';
+                            statusText = 'Nowa';
+                            break;
+                        case 'in-progress':
+                            statusClass = 'status-in-progress';
+                            statusText = 'W realizacji';
+                            break;
+                        case 'completed':
+                            statusClass = 'status-completed';
+                            statusText = 'Zakończona';
+                            break;
+                        case 'cancelled':
+                            statusClass = 'status-cancelled';
+                            statusText = 'Anulowana';
+                            break;
+                    }
+                    
+                    // Payment status badge
+                    let paymentStatusClass, paymentStatusText;
+                    switch(sale.paymentStatus) {
+                        case 'not-paid':
+                            paymentStatusClass = 'status-cancelled';
+                            paymentStatusText = 'Nieopłacona';
+                            break;
+                        case 'partially-paid':
+                            paymentStatusClass = 'status-in-progress';
+                            paymentStatusText = 'Częściowo opłacona';
+                            break;
+                        case 'paid':
+                            paymentStatusClass = 'status-completed';
+                            paymentStatusText = 'Opłacona';
+                            break;
+                        case 'overdue':
+                            paymentStatusClass = 'status-cancelled';
+                            paymentStatusText = 'Przeterminowana';
+                            break;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${sale.id}</td>
+                        <td>${sale.name}</td>
+                        <td>${sale.client}</td>
+                        <td>${sale.owner}</td>
+                        <td>${sale.ioNumber}</td>
+                        <td>${formatDate(sale.date)}</td>
+                        <td>${(sale.amount * (1 + sale.vat/100)).toFixed(2)} zł</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span><br>
+                            <span class="status-badge ${paymentStatusClass}">${paymentStatusText}</span></td>
+                        <td class="action-btns">
+                            <button class="btn btn-sm edit-sale" data-id="${sale.id}">Edytuj</button>
+                            <button class="btn btn-sm btn-danger delete-sale" data-id="${sale.id}">Usuń</button>
+                        </td>
+                    `;
+                });
+                
+                // Dodaj event listeners do przycisków
+                document.querySelectorAll('.edit-sale').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const saleId = parseInt(this.getAttribute('data-id'));
+                        showSaleForm(saleId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-sale').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const saleId = parseInt(this.getAttribute('data-id'));
+                        if (confirm('Czy na pewno chcesz usunąć tę sprzedaż?')) {
+                            deleteSale(saleId);
+                        }
+                    });
+                });
+            }
+
+            function loadSaleData(saleId) {
+                const sale = salesData.find(s => s.id === saleId);
+                if (sale) {
+                    document.getElementById('sale-name').value = sale.name;
+                    document.getElementById('sale-category').value = sale.category;
+                    document.getElementById('sale-client').value = "1"; // Przykładowe dane
+                    document.getElementById('sale-contact').value = "1"; // Przykładowe dane
+                    document.getElementById('sale-owner').value = "1"; // Przykładowe dane
+                    document.getElementById('sale-io-number').value = sale.ioNumber;
+                    document.getElementById('sale-date').value = sale.date;
+                    document.getElementById('sale-status').value = sale.status;
+                    document.getElementById('sale-amount').value = sale.amount;
+                    document.getElementById('sale-vat').value = sale.vat;
+                    document.getElementById('sale-vat-exempt').checked = sale.vatExempt;
+                    if (sale.vatExempt) {
+                        document.getElementById('sale-vat').disabled = true;
+                    }
+                    document.getElementById('sale-invoice').value = sale.invoiceNumber || '';
+                    document.getElementById('sale-payment').value = sale.paymentStatus;
+                    document.getElementById('sale-sap-number').value = sale.sapNumber;
+                    document.getElementById('sale-client-io-number').value = sale.clientIONumber || '';
+                    document.getElementById('sale-payment-method').value = sale.paymentMethod;
+                    document.getElementById('sale-payment-date').value = sale.paymentDate || '';
+                    document.getElementById('sale-description').value = sale.description || '';
+                    document.getElementById('sale-notes').value = sale.notes || '';
+                    
+                    calculateGross();
+                }
+            }
+
+            function resetForm() {
+                document.getElementById('sale-form-view').reset();
+                document.getElementById('sale-vat').disabled = false;
+                fileList.innerHTML = '';
+                files = [];
+                calculateGross();
+            }
+
+            function saveSale() {
+                // Tutaj walidacja formularza
+                const saleData = {
+                    id: currentSaleId || Math.max(...salesData.map(s => s.id)) + 1,
+                    name: document.getElementById('sale-name').value,
+                    category: document.getElementById('sale-category').value,
+                    client: document.getElementById('sale-client').options[document.getElementById('sale-client').selectedIndex].text,
+                    owner: document.getElementById('sale-owner').options[document.getElementById('sale-owner').selectedIndex].text,
+                    ioNumber: document.getElementById('sale-io-number').value,
+                    date: document.getElementById('sale-date').value,
+                    status: document.getElementById('sale-status').value,
+                    amount: parseFloat(document.getElementById('sale-amount').value),
+                    vat: parseInt(document.getElementById('sale-vat').value),
+                    vatExempt: document.getElementById('sale-vat-exempt').checked,
+                    invoiceNumber: document.getElementById('sale-invoice').value,
+                    paymentStatus: document.getElementById('sale-payment').value,
+                    sapNumber: document.getElementById('sale-sap-number').value,
+                    clientIONumber: document.getElementById('sale-client-io-number').value,
+                    paymentMethod: document.getElementById('sale-payment-method').value,
+                    paymentDate: document.getElementById('sale-payment-date').value,
+                    description: document.getElementById('sale-description').value,
+                    notes: document.getElementById('sale-notes').value,
+                    files: [...files]
+                };
+                
+                if (currentSaleId) {
+                    // Aktualizacja istniejącej sprzedaży
+                    const index = salesData.findIndex(s => s.id === currentSaleId);
+                    if (index !== -1) {
+                        salesData[index] = saleData;
+                    }
+                } else {
+                    // Dodanie nowej sprzedaży
+                    salesData.push(saleData);
+                }
+                
+                showSalesList();
+                alert('Sprzedaż została zapisana!');
+            }
+
+            function deleteSale(saleId) {
+                const index = salesData.findIndex(s => s.id === saleId);
+                if (index !== -1) {
+                    salesData.splice(index, 1);
+                    renderSalesList();
+                }
+            }
+
+            function calculateGross() {
+                const amount = parseFloat(saleAmount.value) || 0;
+                const vat = parseInt(saleVat.value) || 0;
+                const gross = amount * (1 + vat/100);
+                saleGross.value = gross.toFixed(2);
+            }
+
+            function handleFiles(newFiles) {
+                for (let i = 0; i < newFiles.length; i++) {
+                    files.push(newFiles[i]);
+                }
+                renderFileList();
+            }
+
+            function renderFileList() {
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${file.name}</span>
+                        <span class="file-actions" data-index="${index}">Usuń</span>
+                    `;
+                    fileList.appendChild(li);
+                });
+                
+                // Dodaj event listeners do przycisków usuwania
+                document.querySelectorAll('.file-actions').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        files.splice(index, 1);
+                        renderFileList();
+                    });
+                });
+            }
+
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                return new Date(dateString).toLocaleDateString('pl-PL', options);
+            }
+        });
+    </script>
+</body>
+</html>
